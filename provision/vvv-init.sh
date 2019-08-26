@@ -12,7 +12,7 @@ DB_NAME=${DB_NAME//[\\\/\.\<\>\:\"\'\|\?\!\*-]/}
 echo -e "\nCreating database '${DB_NAME}' (if it's not already there)"
 mysql -u root --password=root -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME}"
 echo -e "\nGranting the laravel user priviledges to the '${DB_NAME}' database"
-mysql -u root --password=root -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO laravel@localhost IDENTIFIED BY 'laravel';"
+mysql -u root --password=root -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO laravel@localhost IDENTIFIED BY 'secret';"
 echo -e "\n DB operations done.\n\n"
 
 echo "Setting up the log subfolder for Nginx logs"
@@ -23,7 +23,11 @@ noroot touch ${VVV_PATH_TO_SITE}/log/nginx-access.log
 echo "Setting up the log subfolder for Nginx logs"
 noroot mkdir -p ${VVV_PATH_TO_SITE}/public_html
 
-composer create-project laravel/laravel ${VVV_PATH_TO_SITE}/public_html
+composer create-project laravel/laravel ${VVV_PATH_TO_SITE}/public_html 2>&1 >> ${logfolder}\laravel-install.txt
+
+sed -i "s#DB_DATABASE=homestead#DB_DATABASE=${DB_NAME}#" "${VVV_PATH_TO_SITE}/public_html/.env"
+sed -i "s#DB_USERNAME=homestead#DB_USERNAME=laravel#" "${VVV_PATH_TO_SITE}/public_html/.env"
+sed -i "s#DB_PASSWORD=secret#DB_PASSWORD=secret#" "${VVV_PATH_TO_SITE}/public_html/.env"
 
 
 echo "Copying the sites Nginx config template ( fork this site template to customise the template )"
