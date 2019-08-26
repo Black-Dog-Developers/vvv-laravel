@@ -23,7 +23,7 @@ noroot touch ${VVV_PATH_TO_SITE}/log/nginx-access.log
 echo "Setting up the log subfolder for Nginx logs"
 noroot mkdir -p ${VVV_PATH_TO_SITE}/public_html
 
-composer create-project laravel/laravel ${VVV_PATH_TO_SITE}/public_html 2>&1 >> ${logfolder}\laravel-install.txt
+noroot composer create-project laravel/laravel ${VVV_PATH_TO_SITE}/public_html 2>&1 >> ${logfolder}/provisioner-${VVV_SITE_NAME}-laravel.txt
 
 sed -i "s#DB_DATABASE=homestead#DB_DATABASE=${DB_NAME}#" "${VVV_PATH_TO_SITE}/public_html/.env"
 sed -i "s#DB_USERNAME=homestead#DB_USERNAME=laravel#" "${VVV_PATH_TO_SITE}/public_html/.env"
