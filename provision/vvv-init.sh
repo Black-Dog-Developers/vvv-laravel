@@ -20,14 +20,20 @@ noroot mkdir -p ${VVV_PATH_TO_SITE}/log
 noroot touch ${VVV_PATH_TO_SITE}/log/nginx-error.log
 noroot touch ${VVV_PATH_TO_SITE}/log/nginx-access.log
 
-echo "Setting up the log subfolder for Nginx logs"
+echo "Setting up the public_html subfolder"
 noroot mkdir -p ${VVV_PATH_TO_SITE}/public_html
 
-noroot composer create-project laravel/laravel ${VVV_PATH_TO_SITE}/public_html 2>&1 >> ${logfolder}/provisioner-'${VVV_SITE_NAME}'-laravel.txt
-
-sed -i "s#DB_DATABASE=homestead#DB_DATABASE=${DB_NAME}#" "${VVV_PATH_TO_SITE}/public_html/.env"
-sed -i "s#DB_USERNAME=homestead#DB_USERNAME=laravel#" "${VVV_PATH_TO_SITE}/public_html/.env"
-sed -i "s#DB_PASSWORD=secret#DB_PASSWORD=secret#" "${VVV_PATH_TO_SITE}/public_html/.env"
+if [ ! "$(ls -A ${VVV_PATH_TO_SITE}/public_html)" ]; then
+	echo "Installing Laravel via Composer"
+	noroot composer create-project laravel/laravel ${VVV_PATH_TO_SITE}/public_html 2>&1 | tee ${logfolder}/provisioner-"${VVV_SITE_NAME}"-laravel.txt
+		
+	echo "Configuring Laravel env to access the DB"
+	sed -i "s#DB_DATABASE=homestead#DB_DATABASE=${DB_NAME}#" "${VVV_PATH_TO_SITE}/public_html/.env"
+	sed -i "s#DB_USERNAME=homestead#DB_USERNAME=laravel#" "${VVV_PATH_TO_SITE}/public_html/.env"
+	sed -i "s#DB_PASSWORD=secret#DB_PASSWORD=secret#" "${VVV_PATH_TO_SITE}/public_html/.env"
+else
+	echo "Something already exists in public_html so not altering it"
+fi
 
 
 echo "Copying the sites Nginx config template ( fork this site template to customise the template )"
